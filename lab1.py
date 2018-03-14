@@ -4,19 +4,13 @@ def OFDM(t,N,QPSK):
     sum=0
     for k in range(0,int(N/2)):
         sum+=QPSK[k]*cmath.exp(-1j*t*((2*cmath.pi*k)/(N/2)))
-    return sum
+    return (1 / (N / 2)) * sum
 
 #генерация шумов в радиоканале
-def Signal_Plus_Noise(t,N,QPSK,sigma):
-    part1=OFDM(t,N,QPSK)
-    rnd = 0
-    while(rnd==0):
-        rnd=random.random()
-    part2=sigma*cmath.cos(2*cmath.pi*random.randint(0,1)*cmath.sqrt(-2*cmath.log(rnd)))
-    rnd = 0
-    while (rnd == 0):
-        rnd = random.random()
-    part3=1j*sigma*cmath.cos(2*cmath.pi*random.randint(0,1)*cmath.sqrt(-2*cmath.log(rnd)))
+def Signal_Plus_Noise(t,N,OFDMs,sigma):
+    part1=OFDMs[t]
+    part2=sigma*cmath.cos(2*cmath.pi*random.random()*cmath.sqrt(-2*cmath.log(random.random(),10)))
+    part3=1j*sigma*cmath.cos(2*cmath.pi*random.random()*cmath.sqrt(-2*cmath.log(random.random(), 10)))
     return part1+part2+part3
 
 #подсчет количества ошибок(исходный массив, полученный массив)
@@ -61,7 +55,11 @@ def fun(N,SNR):
         if mas[i]==1 and mas[i+1]==0:
             QPSK.append(complex(1,-1))
 
-    sigma=(cmath.sqrt(1/(cmath.log(4,2)*2*pow(10,0.1*SNR)))).real
+    OFDMs = []
+    for i in range(int(N/2)):
+        OFDMs += [OFDM(i, N, QPSK)]
+
+    sigma=cmath.sqrt(1/(cmath.log(4,2)*2*pow(10,0.1*SNR)))
 
    # print(sigma)
     #Формирование QPSK символов с шумом
@@ -69,8 +67,8 @@ def fun(N,SNR):
     for i in range(0,int(N/2)):
         sum=0
         for k in range(0,int(N/2)):
-            sum+=Signal_Plus_Noise(i,N,QPSK,sigma)*cmath.exp(1j*i*((2*cmath.pi*k)/(N/2)))
-        QPSK_Noisy.append((1/(N/2))*sum)
+            sum+=Signal_Plus_Noise(k,N,OFDMs,sigma)*cmath.exp(1j*i*((2*cmath.pi*k)/(N/2)))
+        QPSK_Noisy.append(sum)
     #демодуляция QPSK-сигнала
     mas2=[]
     mas2=demodulation(QPSK_Noisy)

@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import lab1
-N=256
+N=512
 BER=[]
 # QPSK,tmp=lab1.fun(512,15)
 # x=[]
@@ -21,9 +21,8 @@ BER=[]
 # plt.show()
 x=[]
 y=[]
-for i in range(-5,25,5):
+for i in range(-5,26):
     x.append(i)
-    tmp=0
     QPSK2,tmp=lab1.fun(N,i)
     BER.append(tmp)
     y.append(tmp/N)
